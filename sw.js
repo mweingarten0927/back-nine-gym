@@ -1,5 +1,5 @@
 // Serve the app from the phone first, then refresh the saved copy in the background.
-const CACHE = 'bng-v2';
+const CACHE = 'bng-v3';
 const CORE = ['./', 'index.html', 'manifest.webmanifest', 'icon-180.png', 'icon-512.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(CORE)).then(() => self.skipWaiting()));
