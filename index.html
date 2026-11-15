@@ -1,0 +1,830 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Back Nine Gym">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#f2f4f1" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1412" media="(prefers-color-scheme: dark)">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="icon" type="image/png" href="icon-180.png">
+<style>
+:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Back Nine Gym</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap">
+<style>
+/* Layout: one phone-width column that reads like a golf scorecard. A sticky date and week strip,
+   blocks of rows with square boxes to pencil in, and three tabs at the thumb. */
+:root{
+  --bg:#f2f4f1; --card:#ffffff; --ink:#17201b; --ink-2:#56625b; --line:#d3dad5;
+  --green:#1d6a48; --green-soft:#dcece3; --on-green:#ffffff;
+  --day-a:#1d6a48; --day-b:#23598f; --day-c:#94601c; --on-day:#ffffff;
+  --warn:#a5401c; --warn-soft:#f8e4da;
+  --shadow:rgba(10,20,15,.24);
+  --font-display:"Barlow Condensed","Arial Narrow","Helvetica Neue",Arial,sans-serif;
+  --font-body:"Barlow",system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f1412; --card:#181f1c; --ink:#e8eeea; --ink-2:#9fada5; --line:#2c3632;
+    --green:#62c193; --green-soft:#1b3228; --on-green:#0d1410;
+    --day-a:#62c193; --day-b:#86b6ea; --day-c:#e2b168; --on-day:#0d1410;
+    --warn:#ee9c74; --warn-soft:#3b2419;
+    --shadow:rgba(0,0,0,.5);
+    color-scheme:dark;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0f1412; --card:#181f1c; --ink:#e8eeea; --ink-2:#9fada5; --line:#2c3632;
+  --green:#62c193; --green-soft:#1b3228; --on-green:#0d1410;
+  --day-a:#62c193; --day-b:#86b6ea; --day-c:#e2b168; --on-day:#0d1410;
+  --warn:#ee9c74; --warn-soft:#3b2419;
+  --shadow:rgba(0,0,0,.5);
+  color-scheme:dark;
+}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font:400 16px/1.45 var(--font-body);-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--bg)}
+button,input,textarea{font:inherit;color:inherit}
+button{touch-action:manipulation;cursor:pointer}
+:focus-visible{outline:2px solid var(--green);outline-offset:2px}
+h1,h2,h3,p{margin:0}
+.wrap{max-width:592px;margin-inline:auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.k-A{--day:var(--day-a)} .k-B{--day:var(--day-b)} .k-C{--day:var(--day-c)} .k-D{--day:var(--green)}
+
+/* Top strip */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--bg);border-bottom:1px solid var(--line)}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:12px;padding-block:10px}
+.brand{font:700 .7rem/1 var(--font-body);letter-spacing:.14em;text-transform:uppercase;color:var(--green);margin-bottom:4px}
+.date{font:700 1.5rem/1.05 var(--font-display);letter-spacing:.01em}
+.top-right{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.wk{font:700 1.05rem/1 var(--font-display);letter-spacing:.05em;text-transform:uppercase}
+.sync{display:flex;align-items:center;gap:6px;font-size:.74rem;color:var(--ink-2)}
+.sync i{width:7px;height:7px;border-radius:50%;background:var(--ink-2)}
+.sync[data-s="synced"] i{background:var(--green)}
+.sync[data-s="pending"] i,.sync[data-s="local"] i{background:var(--warn)}
+
+main{padding-block:14px 150px;display:flex;flex-direction:column;gap:14px}
+
+/* Tabs */
+.tabs{position:fixed;left:0;right:0;bottom:0;z-index:25;background:var(--card);border-top:1px solid var(--line);padding-bottom:env(safe-area-inset-bottom,0px)}
+.tabs .wrap{display:grid;grid-template-columns:repeat(3,1fr)}
+.tabs a{display:flex;align-items:center;justify-content:center;min-height:56px;margin-top:-1px;border-top:3px solid transparent;text-decoration:none;color:var(--ink-2);font:700 1rem/1 var(--font-display);letter-spacing:.08em;text-transform:uppercase}
+.tabs a[aria-current="page"]{color:var(--green);border-top-color:var(--green)}
+
+/* Rest timer */
+.rest{position:fixed;left:0;right:0;bottom:calc(57px + env(safe-area-inset-bottom,0px));z-index:24;pointer-events:none}
+.rest .wrap{display:flex;justify-content:center}
+.rest-in{pointer-events:auto;display:flex;align-items:center;gap:14px;margin-bottom:10px;padding:8px 8px 8px 18px;border-radius:14px;background:var(--ink);color:var(--bg);box-shadow:0 6px 20px var(--shadow)}
+.rest-in span{font:700 .8rem/1 var(--font-body);letter-spacing:.12em;text-transform:uppercase}
+.rest-in b{font:700 1.9rem/1 var(--font-display);font-variant-numeric:tabular-nums;min-width:3.2ch}
+.rest-in button{min-height:44px;padding:0 16px;border-radius:10px;border:1.5px solid currentColor;background:transparent;font-weight:600}
+
+/* Session picker */
+.picker{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.pick{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;min-height:66px;min-width:0;padding:6px 4px;border:1.5px solid var(--line);border-radius:12px;background:var(--card)}
+.pick b{font:700 1.6rem/1 var(--font-display)}
+.pick span{font-size:.72rem;line-height:1.1;color:var(--ink-2);text-align:center}
+.pick[aria-pressed="true"]{background:var(--day);border-color:var(--day);color:var(--on-day)}
+.pick[aria-pressed="true"] span{color:inherit}
+.pick em{position:absolute;top:-8px;right:-3px;font:700 .62rem/1 var(--font-body);font-style:normal;letter-spacing:.07em;text-transform:uppercase;padding:4px 6px;border-radius:999px;background:var(--ink);color:var(--bg)}
+
+/* Session heading */
+.shead{display:flex;flex-direction:column;gap:6px;align-items:flex-start}
+.shead h1{font:700 2rem/1.05 var(--font-display);text-wrap:balance}
+.shead p{color:var(--ink-2);font-size:.95rem}
+.shead .phase{color:var(--ink)}
+.note{padding:11px 13px;border-radius:10px;background:var(--green-soft);font-size:.94rem}
+.note.warn{background:var(--warn-soft)}
+.note a,.done a{color:inherit;font-weight:600}
+
+/* Blocks and rows */
+.block{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.bhead{display:flex;align-items:baseline;justify-content:space-between;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line)}
+.bhead h2{font:700 1.02rem/1 var(--font-display);letter-spacing:.09em;text-transform:uppercase}
+.bhead span{font:600 .85rem/1 var(--font-body);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.one,.ex{padding:12px 14px;border-top:1px solid var(--line)}
+.bhead + .one,.bhead + .ex{border-top:0}
+.one{display:flex;align-items:center;gap:12px}
+.one-text{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+.ex{display:flex;flex-direction:column;gap:5px}
+.ex-top{display:flex;align-items:center;gap:8px}
+.ex-top h3{flex:1;min-width:0}
+h3{font:600 1.08rem/1.25 var(--font-body)}
+.tag{flex:none;font:700 .85rem/1 var(--font-display);letter-spacing:.04em;padding:4px 6px;border-radius:5px;background:var(--day);color:var(--on-day)}
+.dose{font-size:.95rem}
+.dose b{font:700 1.12rem/1.2 var(--font-display);letter-spacing:.02em;margin-right:6px}
+.cue,.hint{font-size:.88rem;color:var(--ink-2)}
+.hint{font-weight:600}
+.ctl{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
+.boxes{display:flex;gap:8px}
+.box{flex:none;width:48px;height:48px;display:grid;place-items:center;padding:0;border:2px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink-2);font:700 1.2rem/1 var(--font-display);transition:background .12s,border-color .12s}
+.box.opt{border-style:dashed}
+.box[aria-pressed="true"]{background:var(--day);border-color:var(--day);border-style:solid;color:var(--on-day)}
+.load{display:flex;align-items:center;gap:6px;color:var(--ink-2);font-weight:600}
+.load input{width:78px;height:48px;padding:0 10px;border:2px solid var(--line);border-radius:8px;background:var(--bg);color:var(--ink);text-align:right;font:700 1.3rem/1 var(--font-display);font-variant-numeric:tabular-nums}
+.load input::placeholder{color:var(--ink-2);opacity:.6}
+
+/* Finish */
+.finish{display:flex;flex-direction:column;gap:12px}
+.prog{display:flex;align-items:center;gap:12px;font:600 .88rem/1 var(--font-body);color:var(--ink-2);font-variant-numeric:tabular-nums}
+.bar{flex:1;height:8px;border-radius:99px;background:var(--line);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--day)}
+.feel{border:0;padding:0;margin:0;min-width:0;display:flex;flex-direction:column;gap:8px}
+.feel legend,.lbl,.sec{padding:0;font:700 .78rem/1 var(--font-body);letter-spacing:.1em;text-transform:uppercase;color:var(--ink-2)}
+.feel legend{margin-bottom:8px}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.chip{min-height:52px;min-width:0;padding:6px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);font-weight:600;font-size:.86rem;line-height:1.15}
+.chip[aria-pressed="true"]{border-color:var(--green);background:var(--green-soft)}
+.chip.bad[aria-pressed="true"]{border-color:var(--warn);background:var(--warn-soft)}
+textarea{display:block;width:100%;min-height:64px;padding:10px 12px;border:1.5px solid var(--line);border-radius:10px;background:var(--card);font-size:16px;resize:vertical}
+.primary{min-height:56px;border:0;border-radius:12px;background:var(--green);color:var(--on-green);font:700 1.25rem/1 var(--font-display);letter-spacing:.08em;text-transform:uppercase}
+.primary:disabled{opacity:.4}
+.ghost{min-height:44px;padding:0 14px;border:1.5px solid var(--line);border-radius:10px;background:transparent;font-weight:600;font-size:.9rem}
+.ghost.danger{color:var(--warn);border-color:var(--warn)}
+.done{display:flex;flex-direction:column;gap:6px;align-items:flex-start;padding:14px;border-radius:14px;background:var(--green-soft)}
+.done h2{font:700 1.5rem/1.1 var(--font-display)}
+.done .sum{font-weight:600;font-variant-numeric:tabular-nums}
+
+/* Plan */
+details{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+summary{display:flex;align-items:center;gap:10px;min-height:54px;padding:8px 14px;list-style:none;cursor:pointer;font:700 1.2rem/1.15 var(--font-display);letter-spacing:.02em}
+summary::-webkit-details-marker{display:none}
+summary::after{content:"+";margin-left:auto;font:400 1.5rem/1 var(--font-body);color:var(--ink-2)}
+details[open] > summary::after{content:"\2212"}
+.dbody{display:flex;flex-direction:column;gap:10px;padding:2px 14px 16px;font-size:.97rem}
+.dbody ul,.dbody ol{margin:0;padding-left:1.25em;display:flex;flex-direction:column;gap:8px}
+.dbody .muted{color:var(--ink-2);font-size:.9rem}
+.field{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.field input{min-height:46px;padding:0 10px;border:1.5px solid var(--line);border-radius:10px;background:var(--bg);font-size:16px}
+.pairs{display:flex;flex-direction:column;gap:10px}
+.pairs div{padding-left:12px;border-left:3px solid var(--line)}
+.pairs b{display:block}
+
+/* Scorecard */
+.grid{background:var(--card);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.sc{display:grid;grid-template-columns:3rem repeat(3,1fr) 1.25fr}
+.sc > div{display:grid;place-items:center;min-height:42px;border-top:1px solid var(--line);border-left:1px solid var(--line);font-variant-numeric:tabular-nums}
+.sc > div:nth-child(5n+1){border-left:0}
+.sc > div:nth-child(-n+5){border-top:0;min-height:38px;font:700 .8rem/1 var(--font-body);letter-spacing:.08em;text-transform:uppercase;color:var(--ink-2)}
+.sc .wkn{font:700 1.1rem/1 var(--font-display);color:var(--ink-2)}
+.sc .now{background:var(--green-soft)}
+.sc .wkn.now{color:var(--ink)}
+.sc .d5 b{font:700 1.15rem/1 var(--font-display)}
+.mark{width:26px;height:26px;display:grid;place-items:center;border-radius:6px;background:var(--day);color:var(--on-day)}
+.mark svg{width:17px;height:17px}
+.mark.part{background:transparent;border:2px dashed var(--day)}
+.totals{color:var(--ink-2);font-size:.92rem}
+.empty{padding:18px 14px;border:1.5px dashed var(--line);border-radius:14px;color:var(--ink-2)}
+.sess summary{font:600 1rem/1.2 var(--font-body);letter-spacing:0}
+.sess .sm{color:var(--ink-2);font-weight:500;font-size:.88rem;font-variant-numeric:tabular-nums}
+.lines{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.lines li{display:flex;justify-content:space-between;gap:12px}
+.lines span{min-width:0}
+.lines b{flex:none;font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <div>
+      <div class="brand">Back Nine Gym</div>
+      <div class="date" id="hdr-date">Today</div>
+    </div>
+    <div class="top-right">
+      <span class="wk" id="hdr-week">Week 1 of 12</span>
+      <span class="sync" id="sync" data-s="connecting"><i></i><span>Connecting</span></span>
+    </div>
+  </div>
+</header>
+
+<main id="view" class="wrap"><noscript><p class="empty">This app needs JavaScript turned on.</p></noscript></main>
+
+<div class="rest" id="rest" hidden>
+  <div class="wrap">
+    <div class="rest-in" role="timer">
+      <span id="rest-lbl">Rest</span>
+      <b id="rest-time">1:00</b>
+      <button type="button" id="rest-skip">Skip</button>
+    </div>
+  </div>
+</div>
+
+<nav class="tabs" aria-label="Sections">
+  <div class="wrap">
+    <a href="#today">Today</a>
+    <a href="#plan">Plan</a>
+    <a href="#log">Scorecard</a>
+  </div>
+</nav>
+
+<script>
+(() => {
+'use strict';
+
+/* ---------- The program ---------- */
+const CHECK = '<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const one = (key, name, dose, cue) => ({key, name, dose, cue: cue || '', sets: 1, single: true, load: false});
+
+const WARM = [
+  one('w1', 'Brisk walk', '3–5 min', 'The walk over from your office counts if it is 5 minutes or more.'),
+  one('w2', 'Standing back bends', '10 reps', 'Hands on low back, lean back, 1–2 sec each. Prone press-ups also work. Stop if anything goes down the leg.'),
+  one('w3', 'Dead bug', '8 per side', 'Low back stays flat on the floor.'),
+  one('w4', 'Bird dog', '5 per side, 8-sec holds', 'Hips level, no arching. Reach long, not high.'),
+  one('w5', 'Side plank', '2 × 10–15 sec per side', 'From the knees if needed.'),
+  one('w6', 'Glute bridge', '10 reps, 2-sec squeeze', 'Ribs down, squeeze glutes, do not arch.'),
+  one('w7', '90/90 hip switches', '5 slow per side', 'Stay short of any pinch in the front of the hip.')
+];
+const D5 = [
+  one('d1', 'Standing back bends or prone press-ups', '10 reps', 'Stop if anything goes down the leg.'),
+  one('d2', 'Dead bug', '8 per side', 'Low back stays flat on the floor.'),
+  one('d3', 'Bird dog', '5 per side, 8-sec holds', 'Hips level, no arching.'),
+  one('d4', 'Side plank', '2 × 10–15 sec per side', 'From the knees if needed.'),
+  one('d5', 'Half-kneeling hip flexor stretch', '30 sec per side', 'Glute squeezed, right side first.')
+];
+
+const DL = 'Hips back, shins near vertical, chest proud, armpits tight. Stand by driving the hips forward. Finish tall; do not lean back.';
+const SPLIT = 'Torso upright, front foot flat, lower straight down. Right leg forward first.';
+const RDL = 'Hips square to the floor, back flat, feel the hamstring and glute of the front leg.';
+
+const KIND = {
+  A: {big: 'A', short: 'Hinge', name: 'Hinge and brace', note: 'Heaviest day. Keep it at least 2 days before golf.'},
+  B: {big: 'B', short: 'Trail hip', name: 'Single-leg and trail hip', note: 'The reverse pivot day. Not on kickball day unless it comes after the game.'},
+  C: {big: 'C', short: 'Glutes', name: 'Glutes, posture, rotation', note: 'Lightest on the spine. Fine the day before golf.'},
+  D: {big: '5', short: 'Daily 5', name: 'Daily 5', note: 'Five minutes on every non-gym day. All neutral-spine, so it is safe first thing in the morning.'}
+};
+
+const BLOCKS = {
+  A: [
+    {title: 'Superset A', items: [
+      {tag: 'A1', v: [
+        {from: 1, key: 'kbdl', name: 'Kettlebell deadlift', how: 'Bell raised on a plate or low step.', dose: '3 × 8', start: '35–53 lb bell', cue: DL, sub: 'Dumbbell RDL'},
+        {from: 5, key: 'trapdl', name: 'Trap-bar deadlift', how: 'High handles.', dose: '3 × 8', start: 'near your kettlebell load', cue: DL, sub: 'Dumbbell RDL'},
+        {from: 7, key: 'trapdl', name: 'Trap-bar deadlift', how: 'High handles. Heavier, fewer reps.', dose: '3 × 6', start: 'a small jump from last week', cue: DL, sub: 'Dumbbell RDL'}
+      ]},
+      {tag: 'A2', v: [{from: 1, key: 'pallof', name: 'Half-kneeling Pallof press', how: 'Knee nearest the machine down.', dose: '3 × 8 per side, 3-sec hold', start: 'a light cable', cue: 'Press straight out, do not let the cable turn you.'}]}
+    ]},
+    {title: 'Superset B', items: [
+      {tag: 'B1', v: [{from: 1, key: 'hipthrust', name: 'Hip thrust', how: 'Shoulders on a bench.', dose: '3 × 10, 2-sec pause at top', start: 'bodyweight, then a 25–45 lb dumbbell', cue: 'Chin tucked, ribs down. Glutes finish the lift, not the low back.', sub: 'Glute bridge'}]},
+      {tag: 'B2', v: [{from: 1, key: 'csrow', name: 'Chest-supported dumbbell row', how: 'Palms facing in.', dose: '3 × 10', start: '20–35 lb', cue: 'Chest on an incline bench. Pull elbows to the back pockets.', sub: 'Seated cable row, sitting upright'}]}
+    ]},
+    {title: 'Finisher', items: [
+      {tag: 'C', v: [{from: 1, key: 'suitcase', name: 'Suitcase carry', how: 'One weight, one hand.', dose: '3 trips of 30–40 m per side', start: '25–40 lb', cue: 'Walk tall. Do not lean toward or away from the weight.'}]}
+    ]}
+  ],
+  B: [
+    {title: 'Superset A', items: [
+      {tag: 'A1', v: [
+        {from: 1, key: 'splitsq', name: 'Goblet split squat', how: '', dose: '3 × 8 per side', start: '15–30 lb', cue: SPLIT, sub: 'Step-up to a low box'},
+        {from: 7, key: 'rfess', name: 'Rear-foot-elevated split squat', how: 'Back foot on a bench.', dose: '3 × 8 per side', start: 'near your split squat load', cue: SPLIT, sub: 'Goblet split squat'}
+      ]},
+      {tag: 'A2', v: [
+        {from: 1, key: 'addsq', name: 'Adductor squeeze bridge', how: 'Ball or foam roller between the knees.', dose: '3 × 10, 3-sec squeeze', load: false, cue: 'Bridge up, squeeze the knees together, hold.'},
+        {from: 5, key: 'copen', name: 'Short-lever Copenhagen plank', how: 'Top knee on a bench.', dose: '3 × 15–20 sec per side', load: false, cue: 'Lift the hips so the body is one straight line. Go back to the squeeze bridge if the groin grabs.', sub: 'Adductor squeeze bridge'}
+      ]}
+    ]},
+    {title: 'Superset B', items: [
+      {tag: 'B1', v: [{from: 1, key: 'latlunge', name: 'Lateral lunge', how: '', dose: '3 × 6–8 per side', start: 'bodyweight, then goblet 15–25 lb', cue: 'Step wide, push the hips back, sit into the heel and glute, other leg straight. On the right side this is the backswing load you are missing.'}]},
+      {tag: 'B2', v: [{from: 1, key: 'pulldown', name: 'Neutral-grip lat pulldown', how: '', dose: '3 × 10', start: 'a moderate weight', cue: 'Tall chest, no big lean back, pain-free for the shoulders.', sub: 'Single-arm cable pulldown'}]}
+    ]},
+    {title: 'Superset C', items: [
+      {tag: 'C1', v: [
+        {from: 1, key: 'ksrdl', name: 'Kickstand RDL', how: 'Back toe on the floor for balance, one dumbbell.', dose: '3 × 8 per side', start: '20–35 lb', cue: RDL},
+        {from: 7, key: 'slrdl', name: 'Single-leg RDL', how: 'One hand on the rack for balance.', dose: '3 × 8 per side', start: 'near your kickstand load', cue: RDL, sub: 'Kickstand RDL'}
+      ]},
+      {tag: 'C2', v: [{from: 1, key: 'chop', name: 'Half-kneeling cable chop', how: 'High to low. Knee nearest the machine up.', dose: '2 × 8 per side', sets: 2, start: 'a light cable', cue: 'Hips and low back stay still. The turn comes from the upper back.'}]}
+    ]}
+  ],
+  C: [
+    {title: 'Superset A', items: [
+      {tag: 'A1', v: [{from: 1, key: 'boxsq', name: 'Goblet box squat', how: '', dose: '3 × 8', start: '25–45 lb', cue: 'Set the box or bench at a height with no hip pinch. Sit back, touch lightly, stand.'}]},
+      {tag: 'A2', v: [{from: 1, key: 'plank', name: 'Forearm plank', how: '', dose: '3 × 20–30 sec', load: false, cue: 'Glutes tight, ribs down. Stop before the low back sags.'}]}
+    ]},
+    {title: 'Superset B', items: [
+      {tag: 'B1', v: [{from: 1, key: 'backext', name: '45-degree back extension', how: 'To a straight line only. Arms crossed.', dose: '3 × 10, 2-sec hold at top', load: false, cue: 'Move at the hips. Stop when the body is straight; do not arch past it.', sub: 'Cable pull-through or single-leg glute bridge'}]},
+      {tag: 'B2', v: [{from: 1, key: 'pushup', name: 'Incline push-up', how: 'Hands on a bench or a bar in the rack.', dose: '3 × 8–12', load: false, cue: 'Elbows about 45 degrees from the body, pain-free depth for the shoulders.', sub: 'Landmine press'}]}
+    ]},
+    {title: 'Superset C', items: [
+      {tag: 'C1', v: [{from: 1, key: 'farmer', name: "Farmer's carry", how: 'A weight in each hand.', dose: '3 trips of 40 m', start: '35–50 lb per hand', cue: 'Tall, slow steps, shoulders down.'}]},
+      {tag: 'C2', v: [{from: 1, key: 'wallturn', name: 'Wall hip-turn drill', how: '', dose: '2 × 8 slow', sets: 2, load: false, cue: 'Golf posture, arms crossed, backside lightly touching a wall. Turn back keeping the right cheek on the wall and pressure in the right heel. Turn through so the left cheek replaces it. The backside never leaves the wall.'}]}
+    ]},
+    {title: 'Speed', from: 7, items: [
+      {tag: 'D', v: [{from: 1, key: 'rotation', name: 'Fast rotations', how: 'Cable or medicine ball.', dose: '3 × 5 per side, fast', start: 'light', cue: 'Turn from the hips and upper back, low back quiet. Fast, not heavy.'}]}
+    ]}
+  ]
+};
+
+const FEEL = [
+  {v: 'fine', label: 'Fine', short: 'Back fine'},
+  {v: 'sore', label: 'Sore, 3/10 or less', short: 'Sore'},
+  {v: 'flare', label: 'Flare or leg symptoms', short: 'Flare'}
+];
+const phase = w => w <= 2 ? 'Learn the movements. Pick loads you could do 5 more reps with. The third set is optional.'
+  : w <= 6 ? 'Three sets. Add the smallest jump when every set was clean and your back was no worse the next morning.'
+  : w <= 12 ? 'Heavier hinge, harder single-leg work and fast rotations on Day C. Still leave 2–3 reps in the tank.'
+  : 'Past week 12. Keep the weeks 7–12 setup and keep adding small jumps.';
+
+function layout(kind, w) {
+  if (kind === 'D') return [{title: 'Five moves', items: D5}];
+  const out = [{title: 'Warm-up', items: WARM}];
+  (BLOCKS[kind] || []).forEach(b => {
+    if ((b.from || 1) > w) return;
+    out.push({title: b.title, items: b.items.map((it, i) => {
+      let v = it.v[0];
+      it.v.forEach(x => { if (x.from <= w) v = x; });
+      return {key: v.key, tag: it.tag, name: v.name, how: v.how || '', dose: v.dose, sets: v.sets || 3, start: v.start || '',
+        cue: v.cue || '', sub: v.sub || '', load: v.load !== false, rest: i === b.items.length - 1};
+    })});
+  });
+  return out;
+}
+
+/* ---------- Dates ---------- */
+const pad = n => (n < 10 ? '0' : '') + n;
+const ymd = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const today = () => ymd(new Date());
+const isYmd = s => typeof s === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(s);
+const parseYmd = s => { const a = s.split('-'); return new Date(+a[0], +a[1] - 1, +a[2]); };
+const dayDiff = (a, b) => Math.round((parseYmd(b) - parseYmd(a)) / 864e5);
+const DOW = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MON = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const nice = s => { if (!isYmd(s)) return ''; const d = parseYmd(s); return DOW[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; };
+
+/* ---------- State: kept on this device, mirrored to the account when it is reachable ---------- */
+const LS = 'bng.v1';
+const state = {sessions: {}, meta: {startDate: null}, unsynced: {}};
+try {
+  const p = JSON.parse(localStorage.getItem(LS) || 'null');
+  if (p && typeof p === 'object') {
+    if (p.sessions && typeof p.sessions === 'object') state.sessions = p.sessions;
+    if (p.meta && typeof p.meta === 'object') state.meta = {startDate: isYmd(p.meta.startDate) ? p.meta.startDate : null};
+    if (p.unsynced && typeof p.unsynced === 'object') state.unsynced = p.unsynced;
+  }
+} catch (e) {}
+const persist = () => { try { localStorage.setItem(LS, JSON.stringify(state)); } catch (e) {} };
+
+const ui = {kind: null, day: today(), cues: true, open: {rules: true}, confirmDel: null};
+try { if (localStorage.getItem('bng.cues') === '0') ui.cues = false; } catch (e) {}
+
+function weekOf(date) {
+  const s = state.meta.startDate;
+  if (!isYmd(s) || !isYmd(date)) return 1;
+  const n = Math.floor(dayDiff(s, date) / 7) + 1;
+  return isFinite(n) ? (n < 1 ? 0 : n) : 1;
+}
+const curWeek = () => Math.max(1, weekOf(today()));
+const sid = (date, kind) => date + '_' + kind;
+const norm = s => { if (!s.sets || typeof s.sets !== 'object') s.sets = {}; if (!s.load || typeof s.load !== 'object') s.load = {}; return s; };
+const sessions = () => Object.keys(state.sessions).map(k => state.sessions[k]).filter(s => s && isYmd(s.date) && KIND[s.kind]).map(norm);
+const byRecent = (a, b) => a.date === b.date ? ((b.updatedAt || '') > (a.updatedAt || '') ? 1 : -1) : (a.date < b.date ? 1 : -1);
+
+function ensureS(kind) {
+  const t = today(), id = sid(t, kind);
+  let s = state.sessions[id];
+  if (!s) {
+    if (!state.meta.startDate) { state.meta.startDate = t; markDirty('meta'); }
+    s = state.sessions[id] = {kind, date: t, week: Math.max(1, weekOf(t)), sets: {}, load: {}, feel: null, note: '',
+      done: false, startedAt: new Date().toISOString(), finishedAt: null, updatedAt: null};
+  }
+  return norm(s);
+}
+function touch(s) { s.updatedAt = new Date().toISOString(); markDirty('s:' + sid(s.date, s.kind)); }
+
+function lastLoads(exceptId) {
+  const out = {};
+  sessions().sort(byRecent).forEach(s => {
+    if (sid(s.date, s.kind) === exceptId) return;
+    Object.keys(s.load).forEach(k => { const v = s.load[k]; if (v && !(k in out)) out[k] = String(v); });
+  });
+  return out;
+}
+const gymDone = () => sessions().filter(s => s.kind !== 'D' && s.done).sort(byRecent);
+function nextGym() { const h = gymDone()[0]; return !h ? 'A' : h.kind === 'A' ? 'B' : h.kind === 'B' ? 'C' : 'A'; }
+function defaultKind() {
+  const t = today();
+  const todays = sessions().filter(s => s.date === t).sort(byRecent);
+  const open = todays.filter(s => !s.done)[0];
+  if (open) return open.kind;
+  if (todays[0]) return todays[0].kind;
+  const h = gymDone()[0];
+  if (h && dayDiff(h.date, t) <= 1) return 'D';
+  return nextGym();
+}
+const curKind = () => ui.kind || defaultKind();
+
+/* ---------- Sync ---------- */
+let db = null, uid = null, mode = 'connecting', stale = false, loadTimer = null;
+const pend = {};
+const syncEl = document.getElementById('sync');
+function setSync() {
+  const n = Object.keys(state.unsynced).length;
+  let s, t;
+  if (!db) { s = 'synced'; t = 'Saved on this phone'; }
+  else if (n) { const busy = Object.keys(pend).some(k => pend[k].busy || pend[k].t); s = busy ? 'saving' : 'pending'; t = busy ? 'Saving' : 'Not synced yet'; }
+  else if (stale) { s = 'pending'; t = 'Offline copy'; }
+  else { s = 'synced'; t = 'Synced'; }
+  syncEl.dataset.s = s;
+  syncEl.lastElementChild.textContent = t;
+}
+const docRef = key => {
+  const base = db.doc('data/users/' + uid + '/program');
+  return key === 'meta' ? base : base.collection('sessions').doc(key.slice(2));
+};
+function bodyFor(key) {
+  if (key === 'meta') return {startDate: state.meta.startDate || null};
+  const s = state.sessions[key.slice(2)];
+  return s ? JSON.parse(JSON.stringify(s)) : null;
+}
+function markDirty(key) {
+  state.unsynced[key] = 1;
+  persist();
+  if (db) {
+    const p = pend[key] || (pend[key] = {});
+    clearTimeout(p.t);
+    p.t = setTimeout(() => { p.t = null; flush(key); }, 700);
+  }
+  setSync();
+}
+function goLocal() { db = null; mode = 'local'; clearTimeout(loadTimer); }
+function flush(key) {
+  if (!db || !state.unsynced[key]) return;
+  const p = pend[key] || (pend[key] = {});
+  if (p.busy) { p.again = true; return; }
+  p.busy = true; p.again = false;
+  let op;
+  try { const body = bodyFor(key), r = docRef(key); op = body === null ? r.delete() : r.set(body); }
+  catch (e) { op = Promise.reject({code: 'invalid_argument'}); }
+  op.then(() => {
+    p.retried = false;
+    if (!p.again) { delete state.unsynced[key]; persist(); }
+  }, e => {
+    const c = e && e.code;
+    if (c === 'quota_exceeded' || c === 'resource_exhausted') return;
+    if (c === 'invalid_argument' || c === 'transform_error' || c === 'revoked' || c === 'not_granted' || c === 'capability_disabled' || c === 'capability_removed') { goLocal(); return; }
+    if (!p.retried) { p.retried = true; setTimeout(() => flush(key), 1000 + Math.random() * 1500); }
+    else p.retried = false;
+  }).then(() => {
+    p.busy = false;
+    if (p.again && db) flush(key);
+    setSync();
+  });
+  setSync();
+}
+const flushAll = () => { if (db) Object.keys(state.unsynced).forEach(flush); };
+
+function subscribe() {
+  const base = db.doc('data/users/' + uid + '/program');
+  loadTimer = setTimeout(() => { stale = true; setSync(); }, 10000);
+  const settled = m => { if (m && !m.fromCache) { clearTimeout(loadTimer); stale = false; setSync(); } };
+  const dead = () => { goLocal(); setSync(); };
+  base.onSnapshot(snap => {
+    settled(snap.metadata);
+    if (state.unsynced.meta || !snap.exists) return;
+    const d = snap.data() || {};
+    const sd = isYmd(d.startDate) ? d.startDate : null;
+    if (sd !== state.meta.startDate) { state.meta.startDate = sd; persist(); render(); }
+  }, dead);
+  base.collection('sessions').orderBy('date', 'desc').limit(300).onSnapshot(snap => {
+    settled(snap.metadata);
+    const remote = {};
+    snap.docs.forEach(d => { const b = d.data(); if (b && typeof b === 'object') remote[d.id] = JSON.parse(JSON.stringify(b)); });
+    const next = {};
+    Object.keys(remote).forEach(id => {
+      if (state.unsynced['s:' + id]) { if (state.sessions[id]) next[id] = state.sessions[id]; }
+      else next[id] = remote[id];
+    });
+    Object.keys(state.sessions).forEach(id => {
+      if (!(id in remote) && (state.unsynced['s:' + id] || snap.metadata.fromCache)) next[id] = state.sessions[id];
+    });
+    if (JSON.stringify(next) !== JSON.stringify(state.sessions)) { state.sessions = next; persist(); render(); }
+  }, dead);
+}
+
+const use = (window.claude && typeof window.claude.use === 'function')
+  ? n => { try { return Promise.resolve(window.claude.use(n)); } catch (e) { return Promise.resolve(null); } }
+  : () => Promise.resolve(null);
+Promise.all([use('db'), use('user')]).then(r => {
+  const d = r[0], u = r[1];
+  if (!d || !u) { mode = 'local'; setSync(); return; }
+  return u.id().then(id => {
+    if (!id) { mode = 'local'; setSync(); return; }
+    uid = id; db = d; mode = 'ready';
+    subscribe(); flushAll(); setSync();
+  });
+}).catch(() => { goLocal(); setSync(); });
+
+/* ---------- Rest timer and screen wake ---------- */
+const restEl = document.getElementById('rest'), restTime = document.getElementById('rest-time'), restLbl = document.getElementById('rest-lbl');
+let restEnd = 0, restInt = null;
+function tickRest() {
+  const left = Math.ceil((restEnd - Date.now()) / 1000);
+  if (left <= 0) { restLbl.textContent = 'Go'; restTime.textContent = '0:00'; if (left <= -4) stopRest(); return; }
+  restLbl.textContent = 'Rest';
+  restTime.textContent = Math.floor(left / 60) + ':' + pad(left % 60);
+}
+function startRest(sec) { restEnd = Date.now() + sec * 1000; restEl.hidden = false; tickRest(); if (!restInt) restInt = setInterval(tickRest, 250); }
+function stopRest() { clearInterval(restInt); restInt = null; restEl.hidden = true; }
+document.getElementById('rest-skip').addEventListener('click', stopRest);
+
+let wake = null;
+async function keepAwake() {
+  try {
+    if (wake || !('wakeLock' in navigator)) return;
+    wake = await navigator.wakeLock.request('screen');
+    wake.addEventListener('release', () => { wake = null; });
+  } catch (e) { wake = null; }
+}
+
+/* ---------- Views ---------- */
+const view = document.getElementById('view');
+const route = () => { const h = (location.hash || '').slice(1); return h === 'plan' || h === 'log' ? h : 'today'; };
+
+function box(key, i, on, opt, name, label) {
+  return '<button type="button" class="box' + (opt ? ' opt' : '') + '" data-act="set" data-key="' + key + '" data-i="' + i + '" aria-pressed="' + (on ? 'true' : 'false') +
+    '" aria-label="' + esc(name) + (label ? ', set ' + i : '') + '">' + (on ? CHECK : label) + '</button>';
+}
+function rowOne(it, s) {
+  const on = !!(s && s.sets[it.key] >= 1);
+  return '<div class="one"><div class="one-text"><h3>' + esc(it.name) + '</h3><p class="dose"><b>' + esc(it.dose) + '</b></p>' +
+    (ui.cues && it.cue ? '<p class="cue">' + esc(it.cue) + '</p>' : '') + '</div>' + box(it.key, 1, on, false, it.name, '') + '</div>';
+}
+function rowEx(it, s, w, last) {
+  const n = (s && s.sets[it.key]) || 0;
+  let boxes = '';
+  for (let i = 1; i <= it.sets; i++) boxes += box(it.key, i, n >= i, w <= 2 && it.sets === 3 && i === 3, it.name, String(i));
+  let h = '<div class="ex"><div class="ex-top"><span class="tag">' + esc(it.tag) + '</span><h3>' + esc(it.name) + '</h3></div>' +
+    '<p class="dose"><b>' + esc(it.dose) + '</b>' + esc(it.how) + '</p>';
+  if (ui.cues) {
+    if (it.cue) h += '<p class="cue">' + esc(it.cue) + '</p>';
+    if (it.sub) h += '<p class="cue">Substitute: ' + esc(it.sub) + '.</p>';
+  }
+  let load = '';
+  if (it.load) {
+    const val = s && s.load[it.key] != null ? s.load[it.key] : '', lv = last[it.key];
+    h += '<p class="hint">' + (lv ? 'Last time: ' + esc(lv) + ' lb' : 'Start: ' + esc(it.start)) + '</p>';
+    load = '<label class="load"><input id="load-' + it.key + '" type="text" inputmode="decimal" autocomplete="off" maxlength="6" value="' + esc(val) +
+      '" placeholder="' + esc(lv || '') + '" aria-label="Weight for ' + esc(it.name) + ', in pounds"><span>lb</span></label>';
+  }
+  return h + '<div class="ctl"><div class="boxes">' + boxes + '</div>' + load + '</div></div>';
+}
+function counts(L, s) {
+  let tot = 0, got = 0;
+  L.forEach(b => b.items.forEach(it => { tot += it.sets; got += Math.min(it.sets, (s && s.sets[it.key]) || 0); }));
+  return {tot, got};
+}
+function doneCard(s, kind, c) {
+  if (kind === 'D') return '<section class="done k-D"><h2>Daily 5 done</h2><p>Logged for ' + esc(nice(s.date)) + '.</p></section>';
+  let mins = '';
+  if (s.startedAt && s.finishedAt) { const m = Math.round((Date.parse(s.finishedAt) - Date.parse(s.startedAt)) / 6e4); if (m > 0 && m < 240) mins = m + ' min · '; }
+  const w = s.week || 1;
+  const advice = s.feel === 'flare' ? 'No loaded lifting until walking is normal and the Daily 5 is comfortable. Drop any exercise that sent symptoms down the leg. <a href="#plan">Open the spasm plan</a>.'
+    : s.feel === 'sore' ? 'Hold these loads next time. If your back is worse tomorrow morning, cut 20%.'
+    : s.feel === 'fine' ? (w <= 2 ? 'Same loads next time while you learn the movements.' : 'If every set was clean and your back is no worse tomorrow morning, add the smallest jump next time.')
+    : 'Tap how your back feels below so the next session can adjust.';
+  return '<section class="done k-' + kind + '"><h2>Day ' + kind + ' logged</h2><p class="sum">' + mins + c.got + ' of ' + c.tot + ' ticked</p><p>' + advice +
+    '</p><button type="button" class="ghost" data-act="reopen">Reopen</button></section>';
+}
+function vToday() {
+  const kind = curKind(), t = today(), w = curWeek(), id = sid(t, kind);
+  const s = state.sessions[id] ? norm(state.sessions[id]) : null;
+  const L = layout(kind, w), last = lastLoads(id), c = counts(L, s), gym = kind !== 'D';
+  const todays = {}; sessions().forEach(x => { if (x.date === t) todays[x.kind] = x; });
+  const gymToday = ['A', 'B', 'C'].some(k => todays[k]), nx = nextGym();
+
+  let h = '<div class="picker" role="group" aria-label="Choose a session">' + ['A', 'B', 'C', 'D'].map(k =>
+    '<button type="button" class="pick k-' + k + '" data-act="pick" data-v="' + k + '" aria-pressed="' + (k === kind ? 'true' : 'false') + '"><b>' + KIND[k].big +
+    '</b><span>' + KIND[k].short + '</span>' + (todays[k] && todays[k].done ? '<em>Done</em>' : (!gymToday && k === nx ? '<em>Next</em>' : '')) + '</button>').join('') + '</div>';
+
+  if (s && s.done) h += doneCard(s, kind, c);
+  h += '<section class="shead k-' + kind + '"><h1>' + (gym ? 'Day ' + kind + ' · ' : '') + esc(KIND[kind].name) + '</h1><p>' + esc(KIND[kind].note) + '</p>';
+  if (gym) h += '<p class="phase"><b>Week ' + w + '.</b> ' + esc(phase(w)) + '</p>';
+  h += '<button type="button" class="ghost" data-act="cues">' + (ui.cues ? 'Hide cues' : 'Show cues') + '</button></section>';
+
+  if (gym && !(s && s.done)) {
+    const p = gymDone().filter(x => x.date < t)[0];
+    if (p && p.feel === 'flare') h += '<p class="note warn">Your last session ended with a flare. Come back at 50–60% of your previous loads this week.</p>';
+    else if (p && p.feel === 'sore') h += '<p class="note">Your back was sore after the last session. Hold the same loads today.</p>';
+  }
+  L.forEach(b => {
+    const bc = counts([b], s);
+    h += '<section class="block k-' + kind + '"><div class="bhead"><h2>' + esc(b.title) + '</h2><span>' + bc.got + '/' + bc.tot + '</span></div>' +
+      b.items.map(it => it.single ? rowOne(it, s) : rowEx(it, s, w, last)).join('') + '</section>';
+  });
+
+  h += '<section class="finish k-' + kind + '"><div class="prog"><div class="bar"><i style="width:' + (c.tot ? Math.round(c.got / c.tot * 100) : 0) + '%"></i></div><span>' + c.got + ' of ' + c.tot + ' ticked</span></div>';
+  if (gym) {
+    const f = s && s.feel;
+    h += '<fieldset class="feel"><legend>Back after this session</legend><div class="chips">' + FEEL.map(o =>
+      '<button type="button" class="chip' + (o.v === 'flare' ? ' bad' : '') + '" data-act="feel" data-v="' + o.v + '" aria-pressed="' + (f === o.v ? 'true' : 'false') + '">' + o.label + '</button>').join('') + '</div></fieldset>' +
+      '<label class="lbl" for="note">Note</label><textarea id="note" rows="2" maxlength="500" placeholder="Anything to remember next time">' + esc((s && s.note) || '') + '</textarea>';
+    if (!(s && s.done)) h += '<button type="button" class="primary" data-act="finish"' + (c.got ? '' : ' disabled') + '>Finish workout</button>';
+  }
+  return h + '</section>';
+}
+
+const det = (id, title, body) => '<details id="' + id + '"' + (ui.open[id] ? ' open' : '') + '><summary>' + title + '</summary><div class="dbody">' + body + '</div></details>';
+function vPlan() {
+  const w = curWeek();
+  return '<section class="shead"><h1>The plan</h1><p>Three gym sessions a week, 35–45 minutes each, and five minutes on the other days.</p></section>' +
+  det('rules', 'Four rules',
+    '<ol><li><b>Neutral spine under load.</b> The hips hinge, the back does not round. A rep where the low back rounds ends the set.</li>' +
+    '<li><b>Desk-to-lift rule.</b> After 30+ minutes of sitting, never go straight to lifting anything heavy: your son, the car seat, the golf bag, luggage, a barbell. Walk 2–3 minutes and do 10 standing back bends first.</li>' +
+    '<li><b>Symptom rule.</b> Back discomfort up to 3/10 that is gone by the next morning is fine. Anything that travels down the leg means stop that exercise. A worse back the next morning means cut the load by 20% next time.</li>' +
+    '<li><b>Leave reps in the tank.</b> Finish every set knowing you could have done 2–3 more. No grinding.</li></ol>') +
+  det('program', 'Twelve weeks',
+    '<p><b>You are in week ' + w + '.</b> ' + esc(phase(w)) + '</p>' +
+    '<ul><li><b>Weeks 1–2.</b> Learn the movements. Loads you could do 5 more reps with. Two sets is fine.</li>' +
+    '<li><b>Weeks 3–6.</b> Three sets. Smallest jump available when all sets were clean and your back was no worse the next morning. Trap-bar deadlift and Copenhagen plank come in at week 5.</li>' +
+    '<li><b>Weeks 7–12.</b> Trap-bar deadlift 3 × 6, rear-foot-elevated split squat, single-leg RDL, and fast rotations on Day C.</li></ul>' +
+    '<p class="muted">After a missed week, repeat your last week at about 80% of the load. The exercises on the Today tab change with the week.</p>' +
+    '<div class="field"><label for="start-date"><b>Program start</b></label><input type="date" id="start-date" value="' + esc(state.meta.startDate || '') + '"></div>' +
+    '<p class="muted">Set on your first tick. Change it if you restart.</p>') +
+  det('week', 'Weekly layout',
+    '<ul><li><b>Day A, hinge and brace.</b> Heaviest day. Keep it at least 2 days before golf.</li>' +
+    '<li><b>Day B, single-leg and trail hip.</b> Not on kickball day unless it comes after the game.</li>' +
+    '<li><b>Day C, glutes, posture, rotation.</b> Lightest on the spine. Fine the day before golf.</li>' +
+    '<li><b>Other days, Daily 5.</b></li></ul><p class="muted">Any three non-consecutive days work.</p>') +
+  det('skip', 'Skip for now',
+    '<ul><li>Sit-ups, crunches, Russian twists, hanging leg raises</li><li>Standing or seated toe-touch stretches</li>' +
+    '<li>Barbell back squat and conventional deadlift from the floor</li><li>Deep leg press where the pelvis tucks under</li><li>Bent-over barbell rows</li>' +
+    '<li>Dips, overhead barbell press, wide-grip bench, heavy curls, palms-up chin-ups</li>' +
+    '</ul>') +
+  det('habits', 'Everyday habits',
+    '<ul><li><b>Sitting.</b> Every 30–45 minutes, stand, do 5 back bends and walk for a minute. Use a small lumbar roll in the desk chair and the car.</li>' +
+    '<li><b>Lifting your son.</b> Get close, hinge at the hips or drop to one knee, exhale and brace, then lift. No bending and twisting at the same time.</li>' +
+    '<li><b>Golf day.</b> After the drive, walk a few minutes and do 10 back bends before pulling the bag out of the trunk. Walk the course when you can.</li></ul>') +
+  det('flare', 'If a spasm hits',
+    '<ol><li>No bed rest. Short, easy walks every hour or two.</li><li>Lie face down or do gentle press-ups if they feel good. Heat. NSAIDs as you normally tolerate them.</li>' +
+    '<li>Skip loaded lifting. Keep the dead bugs and whatever else in the Daily 5 is pain-free.</li>' +
+    '<li>Return to the gym when walking is normal and the Daily 5 is comfortable. First week back at 50–60% of your previous loads.</li></ol>') +
+  det('swing', 'How this helps the swing',
+    '<ul><li><b>Early extension.</b> The hips thrust toward the ball when the glutes and front of the core cannot hold the pelvis back while you rotate. Deadlift, hip thrust, plank and dead bug build that hold. The wall hip-turn drill and the chop practise turning inside the hinge.</li>' +
+    '<li><b>Reverse pivot.</b> The weight goes to the lead side in the backswing when the body cannot turn into and load the right hip. Lateral lunge, kickstand RDL and right-leg-forward split squat build that load.</li>' +
+    '<li><b>Your back.</b> Early extension arches and side-bends the low back at impact, so fixing it lowers the load there.</li></ul>' +
+    '<p class="muted">Strength makes the correct move possible. A lesson or two once the hip loading feels strong will help it stick.</p>') +
+  det('checked', 'When to see a doctor',
+    '<p class="note warn"><b>See a doctor promptly</b> for new foot weakness or foot drop, numbness in the groin or saddle area, changes in bladder or bowel control, symptoms in both legs, or leg pain that keeps getting worse.</p>') +
+  '<p class="totals">A personal training plan. It is not medical advice.</p>';
+}
+
+function sessRow(s) {
+  const id = sid(s.date, s.kind), L = layout(s.kind, s.week || 1), c = counts(L, s), lines = [];
+  L.forEach(b => b.items.forEach(it => {
+    const n = Math.min(it.sets, s.sets[it.key] || 0);
+    if (it.single || !n) return;
+    const ld = it.load && s.load[it.key];
+    lines.push('<li><span>' + esc(it.name) + '</span><b>' + (ld ? n + ' × ' + esc(ld) + ' lb' : n + (n === 1 ? ' set' : ' sets')) + '</b></li>');
+  }));
+  const f = FEEL.filter(o => o.v === s.feel)[0];
+  let mins = '';
+  if (s.startedAt && s.finishedAt) { const m = Math.round((Date.parse(s.finishedAt) - Date.parse(s.startedAt)) / 6e4); if (m > 0 && m < 240) mins = '<p class="muted">' + m + ' minutes</p>'; }
+  return '<details class="sess k-' + s.kind + '" id="s-' + esc(id) + '"' + (ui.open['s-' + id] ? ' open' : '') + '><summary><span class="tag">' + KIND[s.kind].big + '</span><span>' + esc(nice(s.date)) +
+    '</span><span class="sm">' + c.got + '/' + c.tot + (f ? ' · ' + f.short : '') + (s.done ? '' : ' · open') + '</span></summary><div class="dbody">' +
+    (lines.length ? '<ul class="lines">' + lines.join('') + '</ul>' : '') + (s.note ? '<p>' + esc(s.note) + '</p>' : '') + mins +
+    '<div><button type="button" class="ghost danger" data-act="del" data-id="' + esc(id) + '">' + (ui.confirmDel === id ? 'Tap again to delete' : 'Delete this session') + '</button></div></div></details>';
+}
+function vLog() {
+  const all = sessions().sort(byRecent), cw = curWeek(), rows = Math.max(12, cw), G = {};
+  let gymN = 0, d5N = 0;
+  all.forEach(s => {
+    if (s.done) { if (s.kind === 'D') d5N++; else gymN++; }
+    const w = weekOf(s.date);
+    if (w < 1) return;
+    const g = G[w] || (G[w] = {D: 0});
+    if (s.kind === 'D') { if (s.done) g.D++; }
+    else if (s.done) g[s.kind] = 'done';
+    else if (!g[s.kind]) g[s.kind] = 'part';
+  });
+  let h = '<section class="shead"><h1>Scorecard</h1><p>Twelve weeks. Three gym days a week, Daily 5 on the rest.</p></section>' +
+    '<section class="grid" aria-label="Twelve-week scorecard"><div class="sc"><div>Wk</div><div class="k-A"><span class="tag">A</span></div><div class="k-B"><span class="tag">B</span></div><div class="k-C"><span class="tag">C</span></div><div>Daily 5</div>';
+  for (let w = 1; w <= rows; w++) {
+    const g = G[w] || {D: 0}, now = w === cw ? ' now' : '';
+    h += '<div class="wkn' + now + '">' + w + '</div>' + ['A', 'B', 'C'].map(k => '<div class="k-' + k + now + '">' +
+      (g[k] === 'done' ? '<span class="mark" role="img" aria-label="Day ' + k + ' done">' + CHECK + '</span>' : g[k] === 'part' ? '<span class="mark part" role="img" aria-label="Day ' + k + ' started"></span>' : '') + '</div>').join('') +
+      '<div class="d5' + now + '">' + (g.D ? '<b>' + g.D + '</b>' : '') + '</div>';
+  }
+  h += '</div></section>';
+  if (!all.length) return h + '<p class="empty">Nothing logged yet. Tick off a workout on the Today tab and it lands here, with the weights you used.</p>';
+  return h + '<p class="totals">' + gymN + (gymN === 1 ? ' gym session' : ' gym sessions') + ' and ' + d5N + (d5N === 1 ? ' Daily 5' : ' Daily 5s') + ' logged. ' +
+    (db ? 'Saved to your Claude account and private to you.' : 'Saved on this phone.') + '</p><h2 class="sec">Sessions</h2>' + all.map(sessRow).join('');
+}
+
+function render() {
+  const r = route(), ae = document.activeElement;
+  const fid = ae && ae.id && view.contains(ae) ? ae.id : null;
+  let ss = null, se = null;
+  if (fid) { try { ss = ae.selectionStart; se = ae.selectionEnd; } catch (e) {} }
+  view.innerHTML = r === 'plan' ? vPlan() : r === 'log' ? vLog() : vToday();
+  document.getElementById('hdr-date').textContent = nice(today());
+  const w = curWeek();
+  document.getElementById('hdr-week').textContent = w <= 12 ? 'Week ' + w + ' of 12' : 'Week ' + w;
+  document.querySelectorAll('.tabs a').forEach(a => {
+    if (a.getAttribute('href') === '#' + r) a.setAttribute('aria-current', 'page'); else a.removeAttribute('aria-current');
+  });
+  if (fid) {
+    const el = document.getElementById(fid);
+    if (el) { try { el.focus({preventScroll: true}); if (ss != null) el.setSelectionRange(ss, se); } catch (e) {} }
+  }
+}
+
+/* ---------- Actions ---------- */
+function findItem(kind, key) {
+  let hit = null;
+  layout(kind, curWeek()).forEach(b => b.items.forEach(it => { if (it.key === key) hit = it; }));
+  return hit;
+}
+view.addEventListener('click', e => {
+  const b = e.target.closest('[data-act]');
+  if (!b || !view.contains(b)) return;
+  const act = b.dataset.act, kind = curKind();
+  if (act !== 'del') ui.confirmDel = null;
+  if (act === 'pick') { ui.kind = b.dataset.v; render(); window.scrollTo(0, 0); return; }
+  if (act === 'cues') { ui.cues = !ui.cues; try { localStorage.setItem('bng.cues', ui.cues ? '1' : '0'); } catch (x) {} render(); return; }
+  if (act === 'del') {
+    const id = b.dataset.id;
+    if (ui.confirmDel === id) { delete state.sessions[id]; delete ui.open['s-' + id]; ui.confirmDel = null; markDirty('s:' + id); }
+    else ui.confirmDel = id;
+    render(); return;
+  }
+  const s = ensureS(kind);
+  ui.kind = kind;
+  if (act === 'set') {
+    const key = b.dataset.key, i = +b.dataset.i, n = s.sets[key] || 0, nn = n >= i ? i - 1 : i;
+    s.sets[key] = nn;
+    if (nn > n) {
+      const it = findItem(kind, key);
+      if (it && it.load && !s.load[key]) { const lv = lastLoads(sid(s.date, kind))[key]; if (lv) s.load[key] = lv; }
+      if (it && it.rest) startRest(60);
+      keepAwake();
+    }
+    if (kind === 'D') {
+      const d = D5.every(it => (s.sets[it.key] || 0) >= 1);
+      if (d !== !!s.done) { s.done = d; s.finishedAt = d ? new Date().toISOString() : null; }
+    }
+  } else if (act === 'feel') {
+    s.feel = s.feel === b.dataset.v ? null : b.dataset.v;
+    if (s.feel === 'flare') ui.open.flare = true;
+  } else if (act === 'finish') {
+    s.done = true; s.finishedAt = new Date().toISOString(); stopRest();
+  } else if (act === 'reopen') {
+    s.done = false; s.finishedAt = null;
+  } else return;
+  touch(s);
+  render();
+  if (act === 'finish') window.scrollTo(0, 0);
+});
+view.addEventListener('input', e => {
+  const el = e.target;
+  if (!el.id) return;
+  if (el.id.indexOf('load-') === 0) {
+    const s = ensureS(curKind()); ui.kind = s.kind;
+    s.load[el.id.slice(5)] = String(el.value).replace(/[^0-9.,]/g, '').slice(0, 6);
+    touch(s);
+  } else if (el.id === 'note') {
+    const s = ensureS(curKind()); ui.kind = s.kind;
+    s.note = String(el.value).slice(0, 500);
+    touch(s);
+  }
+});
+view.addEventListener('change', e => {
+  if (e.target.id !== 'start-date') return;
+  state.meta.startDate = isYmd(e.target.value) ? e.target.value : null;
+  markDirty('meta');
+  render();
+});
+view.addEventListener('toggle', e => { const d = e.target; if (d && d.tagName === 'DETAILS' && d.id) ui.open[d.id] = d.open; }, true);
+
+window.addEventListener('hashchange', () => { ui.confirmDel = null; render(); window.scrollTo(0, 0); });
+window.addEventListener('online', flushAll);
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  if (ui.day !== today()) { ui.day = today(); ui.kind = null; render(); }
+  flushAll();
+  const t = today();
+  if (sessions().some(s => s.date === t && s.kind !== 'D' && !s.done)) keepAwake();
+});
+
+setSync();
+render();
+if ('serviceWorker' in navigator && location.protocol === 'https:') {
+  window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js').catch(() => {}); });
+}
+try { if (navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(() => {}); } catch (e) {}
+})();
+</script>
+</body>
+</html>
